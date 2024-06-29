@@ -107,7 +107,7 @@ export default async function Home() {
 
               Every morning, Pipipupucheck would embark on an adventure through the Misty Meadows and the Enchanted Forest, where the trees whispered secrets and the flowers sang melodies. The creature loved to play games with the forest sprites and dance with the fireflies under the moonlight.
 
-              One day, Pipipupucheck stumbled upon a mysterious, glowing map buried beneath an ancient willow tree. The map was inscribed with peculiar symbols and led to a hidden treasure said to grant any wish. Excited and determined, Pipipupucheck set off on a quest, following the map's intricate paths and solving puzzles along the way.</Text>
+              One day, Pipipupucheck stumbled upon a mysterious, glowing map buried beneath an ancient willow tree. The map was inscribed with peculiar symbols and led to a hidden treasure said to grant any wish. Excited and determined, Pipipupucheck set off on a quest, following the maps intricate paths and solving puzzles along the way.</Text>
           </CardContent>
         </Card>
       </div>
