@@ -32,7 +32,8 @@ import {
   PlusIcon,
   ShieldCheckIcon,
   UserCircleIcon,
-} from '@heroicons/react/16/solid'
+  EyeIcon
+} from '@heroicons/react/24/solid'
 import {
   Cog6ToothIcon,
   HomeIcon,
@@ -129,6 +130,10 @@ export function ApplicationLayout({
               <SidebarItem href="/" current={pathname === '/'}>
                 <HomeIcon />
                 <SidebarLabel>Home</SidebarLabel>
+              </SidebarItem>
+              <SidebarItem href="/Watchlist" current={pathname === '/Watchlist'}>
+                <EyeIcon />
+                <SidebarLabel>Watchlist</SidebarLabel>
               </SidebarItem>
             </SidebarSection>
 
