@@ -1,3 +1,6 @@
+"use client"
+
+import React, { useState } from 'react'
 import { Badge } from '@/components/badge'
 import { Divider } from '@/components/divider'
 import { Heading, Subheading } from '@/components/heading'
@@ -17,26 +20,31 @@ import {
 import { Overview } from '@/components/overview';
 import { Kpi, columns } from "./kpi/columns"
 import { DataTable } from "./kpi/data-table"
-
-async function getData(): Promise<Kpi[]> {
-  // Fetch data from your API here.
-  return [
-    {
-      kpi: "Revenue",
-      value: 100,
-      change: 99,
-      year: 2024,
-      context: "this is context"
-    },
-    {
-      kpi: "COGS",
-      value: 2000,
-      change: 32,
-      year: 2024,
-      context: "this is context"
-    },
-    // ...
-  ]
+import Drawer from '@/components/ui/drawer'
+async function getData(): Promise<{ kpis: Kpi[], revenueSources: { text: string, content: string }[] }> {
+  return {
+    kpis: [
+      {
+        kpi: "Revenue",
+        value: 100,
+        change: 99,
+        year: 2024,
+        context: "this is context"
+      },
+      {
+        kpi: "COGS",
+        value: 2000,
+        change: 32,
+        year: 2024,
+        context: "this is context"
+      },
+      // ...
+    ],
+    revenueSources: [
+      { text: "Source 1", content: "This is the content of source 1." },
+      { text: "Source 2", content: "This is the content of source 2." }
+    ]
+  }
 }
 
 export function Stat({ title, value, change }: Readonly<{ title: string; value: string; change: string }>) {
@@ -53,8 +61,42 @@ export function Stat({ title, value, change }: Readonly<{ title: string; value: 
   )
 }
 
-export default async function Home() {
-  const data = await getData()
+export default function Home() {
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [drawerContent, setDrawerContent] = useState("")
+  const [drawerTitle, setDrawerTitle] = useState("")
+  const [data, setData] = useState<{ kpis: Kpi[], revenueSources: { text: string, content: string }[] }>({ kpis: [], revenueSources: [] })
+
+  React.useEffect(() => {
+    async function fetchData() {
+      const data = await getData()
+      setData(data)
+    }
+
+    fetchData()
+  }, [])
+
+  function handleSourceClick(index: number) {
+    setDrawerTitle(`Source [${index + 1}]`)
+    setDrawerContent(data.revenueSources[index].content)
+    setDrawerOpen(true)
+  }
+
+  const formattedSources = data.revenueSources.map((source, index) => (
+
+    <React.Fragment key={index}>
+
+      <TextLink onClick={(e) => { e.preventDefault(); handleSourceClick(index); }} href="#">
+
+        [{index + 1}]
+
+      </TextLink>
+
+      {index < data.revenueSources.length - 1 && ", "}
+
+    </React.Fragment>
+
+  ))
   return (
     <>
       <div className="mt-2 flex items-end justify-between">
@@ -103,17 +145,27 @@ export default async function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Text>Once upon a time in the land of Pipipupu, there was a curious creature named Pipipupucheck. This land was unlike any other, filled with vibrant colors, magical sounds, and whimsical beings. Pipipupucheck, a small, fluffy creature with shimmering fur and twinkling eyes, was known for its knack for finding hidden treasures and solving riddles.
+            <Text>
+              Once upon a time in the land of Pipipupu, there was a curious creature named Pipipupucheck. This land was unlike any other, filled with vibrant colors, magical sounds, and whimsical beings. Pipipupucheck, a small, fluffy creature with shimmering fur and twinkling eyes, was known for its knack for finding hidden treasures and solving riddles.
 
               Every morning, Pipipupucheck would embark on an adventure through the Misty Meadows and the Enchanted Forest, where the trees whispered secrets and the flowers sang melodies. The creature loved to play games with the forest sprites and dance with the fireflies under the moonlight.
 
-              One day, Pipipupucheck stumbled upon a mysterious, glowing map buried beneath an ancient willow tree. The map was inscribed with peculiar symbols and led to a hidden treasure said to grant any wish. Excited and determined, Pipipupucheck set off on a quest, following the map's intricate paths and solving puzzles along the way.</Text>
+              One day, Pipipupucheck stumbled upon a mysterious, glowing map buried beneath an ancient willow tree. The map was inscribed with peculiar symbols and led to a hidden treasure said to grant any wish. Excited and determined, Pipipupucheck set off on a quest, following the map&#39;s intricate paths and solving puzzles along the way.
+              <br /><br />Sources: {formattedSources}
+            </Text>
           </CardContent>
         </Card>
       </div>
       <div className="container mx-auto py-10">
-        <DataTable columns={columns} data={data} />
+        <DataTable columns={columns} data={data.kpis} />
       </div>
+
+      <Drawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        title={drawerTitle}
+        content={drawerContent}
+      />
     </>
   )
 }
