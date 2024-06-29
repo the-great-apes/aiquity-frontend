@@ -11,8 +11,15 @@ const config: Config = {
       fontFamily: {
         sans: ['Inter, sans-serif', { fontFeatureSettings: '"cv11"' }],
       },
+      colors: {
+        // Extend your colors here if needed
+      },
     },
   },
-  plugins: [],
+  darkMode: 'class', // Enable dark mode with class-based toggling
+  plugins: [
+    // Add your plugins here
+  ],
 }
+
 export default config
