@@ -55,7 +55,7 @@ export default function Home() {
 
   async function handleSearch(event: React.FormEvent) {
     event.preventDefault();
-    const response = await fetch(`http://localhost/api/${search}/${year}`);
+    const response = await fetch(`http://localhost:8000/api/${search}/${year}`);
     const result = await response.json();
     // Handle the result, setting state with the new data
     setData(result);
