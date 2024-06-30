@@ -59,6 +59,7 @@ export default function Home() {
     const result = await response.json();
     // Handle the result, setting state with the new data
     setData(result);
+    console.log(result)
   }
 
   function handleSourceClick(index: number) {
