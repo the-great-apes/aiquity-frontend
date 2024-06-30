@@ -21,8 +21,7 @@ import { columns } from "./kpi/columns"
 import { DataTable } from "./kpi/data-table"
 import Drawer from '@/components/ui/drawer'
 
-
-export function Stat({ title, value, change }: Readonly<{ title: string; value: string; change: string }>) {
+function Stat({ title, value, change }: Readonly<{ title: string; value: string; change: string }>) {
   return (
     <div>
       <Divider />
