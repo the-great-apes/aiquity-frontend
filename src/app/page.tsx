@@ -191,6 +191,7 @@ export default function Home() {
     setSelectedKpiIndex(0); // Default to showing the first KPI's driver
   }
 
+
   function handleSourceClick(index: number) {
     if (data && data.kpis && data.kpis[index]) {
       setDrawerTitle(`Source [${index + 1}]`);
