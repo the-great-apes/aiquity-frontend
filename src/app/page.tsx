@@ -3,49 +3,24 @@
 import React, { useState } from 'react'
 import { Badge } from '@/components/badge'
 import { Divider } from '@/components/divider'
-import { Heading, Subheading } from '@/components/heading'
+import { Heading } from '@/components/heading'
 import { Select } from '@/components/select'
 import { Input, InputGroup } from '@/components/input'
 import { MagnifyingGlassIcon, StarIcon } from '@heroicons/react/24/solid'
 import { Button } from '@/components/button'
-import { Strong, Text, TextLink } from '@/components/text'
+import { Text, TextLink } from '@/components/text'
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 import { Overview } from '@/components/overview';
-import { Kpi, columns } from "./kpi/columns"
+import { columns } from "./kpi/columns"
 import { DataTable } from "./kpi/data-table"
 import Drawer from '@/components/ui/drawer'
-async function getData(): Promise<{ kpis: Kpi[], revenueSources: { text: string, content: string }[] }> {
-  return {
-    kpis: [
-      {
-        kpi: "Revenue",
-        value: 100,
-        change: 99,
-        year: 2024,
-        context: "this is context"
-      },
-      {
-        kpi: "COGS",
-        value: 2000,
-        change: 32,
-        year: 2024,
-        context: "this is context"
-      },
-      // ...
-    ],
-    revenueSources: [
-      { text: "Source 1", content: "This is the content of source 1." },
-      { text: "Source 2", content: "This is the content of source 2." }
-    ]
-  }
-}
+
 
 export function Stat({ title, value, change }: Readonly<{ title: string; value: string; change: string }>) {
   return (
@@ -54,79 +29,151 @@ export function Stat({ title, value, change }: Readonly<{ title: string; value: 
       <div className="mt-6 text-lg/6 font-medium sm:text-sm/6">{title}</div>
       <div className="mt-3 text-3xl/8 font-semibold sm:text-2xl/8">{value}</div>
       <div className="mt-3 text-sm/6 sm:text-xs/6">
-        <Badge color={change.startsWith('+') ? 'lime' : 'pink'}>{change}</Badge>{' '}
+        <Badge color={change.startsWith("+") ? "lime" : "pink"}>{change}</Badge>{" "}
         <span className="text-zinc-500">from last year</span>
       </div>
     </div>
-  )
+  );
+}
+
+function formatNumber(number: number): string {
+  if (number >= 1_000_000_000) {
+    return (number / 1_000_000_000).toFixed(1) + "B";
+  } else if (number >= 1_000_000) {
+    return (number / 1_000_000).toFixed(1) + "M";
+  } else {
+    return number.toString();
+  }
 }
 
 export default function Home() {
-  const [drawerOpen, setDrawerOpen] = useState(false)
-  const [drawerContent, setDrawerContent] = useState("")
-  const [drawerTitle, setDrawerTitle] = useState("")
-  const [data, setData] = useState<{ kpis: Kpi[], revenueSources: { text: string, content: string }[] }>({ kpis: [], revenueSources: [] })
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerContent, setDrawerContent] = useState("");
+  const [drawerTitle, setDrawerTitle] = useState("");
+  const [search, setSearch] = useState("");
+  const [year, setYear] = useState("2023");
+  const [data, setData] = useState<any>(null);
 
-  React.useEffect(() => {
-    async function fetchData() {
-      const data = await getData()
-      setData(data)
-    }
-
-    fetchData()
-  }, [])
-
-  function handleSourceClick(index: number) {
-    setDrawerTitle(`Source [${index + 1}]`)
-    setDrawerContent(data.revenueSources[index].content)
-    setDrawerOpen(true)
+  async function handleSearch(event: React.FormEvent) {
+    event.preventDefault();
+    const response = await fetch(`https://localhost/${search}/${year}`);
+    const result = await response.json();
+    // Handle the result, setting state with the new data
+    setData(result);
   }
 
-  const formattedSources = data.revenueSources.map((source, index) => (
+  function handleSourceClick(index: number) {
+    if (data && data.kpis && data.kpis[index]) {
+      setDrawerTitle(`Source [${index + 1}]`);
+      setDrawerContent(data.kpis[index].context);
+      setDrawerOpen(true);
+    }
+  }
 
+  if (!data) {
+    return (
+      <form onSubmit={handleSearch}>
+        <div className="mt-2 flex items-end justify-between">
+          <InputGroup>
+            <MagnifyingGlassIcon />
+            <Input
+              name="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search Company&hellip;"
+            />
+          </InputGroup>
+          <div className="flex items-center space-x-4">
+            <Select
+              name="period"
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+            >
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+            </Select>
+            <Button color="white">
+              <StarIcon className="h-5 w-5 stroke-black stroke-2 fill-white hover:fill-black" />
+            </Button>
+            <Button type="button">Export</Button>
+          </div>
+        </div>
+      </form>
+    );
+  }
+
+  const formattedSources = data.kpis.map((kpi: any, index: number) => (
     <React.Fragment key={index}>
-
-      <TextLink onClick={(e) => { e.preventDefault(); handleSourceClick(index); }} href="#">
-
+      <TextLink
+        onClick={(e) => {
+          e.preventDefault();
+          handleSourceClick(index);
+        }}
+        href="#"
+      >
         [{index + 1}]
-
       </TextLink>
-
-      {index < data.revenueSources.length - 1 && ", "}
-
+      {index < data.kpis.length - 1 && ", "}
     </React.Fragment>
+  ));
 
-  ))
   return (
     <>
-      <div className="mt-2 flex items-end justify-between">
-        <InputGroup>
-          <MagnifyingGlassIcon />
-          <Input name="search" placeholder="Search Company&hellip;" />
-        </InputGroup>
-        <div className="flex items-center space-x-4">
-          <Select name="period">
-            <option value="2024">2024</option>
-            <option value="2023">2023</option>
-            <option value="2022">2022</option>
-            <option value="2021">2021</option>
-          </Select>
-          <Button color='white'>
-            <StarIcon className="h-5 w-5 stroke-black stroke-2 fill-white hover:fill-black" />
-          </Button>
-          <Button>Export</Button>
+      <form onSubmit={handleSearch}>
+        <div className="mt-2 flex items-end justify-between">
+          <InputGroup>
+            <MagnifyingGlassIcon />
+            <Input
+              name="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search Company&hellip;"
+            />
+          </InputGroup>
+          <div className="flex items-center space-x-4">
+            <Select
+              name="period"
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+            >
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+            </Select>
+            <Button color="white">
+              <StarIcon className="h-5 w-5 stroke-black stroke-2 fill-white hover:fill-black" />
+            </Button>
+            <Button type="button">Export</Button>
+          </div>
+        </div>
+      </form>
+      <Divider className="mt-5"></Divider>
+      <Heading className="mt-5" level={2}>
+        IBM Annual Report
+      </Heading>
+      <div className="mt-3 overflow-hidden bg-white shadow sm:rounded-lg">
+        <div className="px-4 py-5 sm:p-6">
+          {"This is an executive summary of Cash Money Bitches."}
         </div>
       </div>
-      <Divider className='mt-5'></Divider>
-      <Heading className="mt-5" level={2}>IBM Annual Report</Heading>
-      <div className="mt-3 overflow-hidden bg-white shadow sm:rounded-lg">
-        <div className="px-4 py-5 sm:p-6">{"This is an executive summary of Cash Money Bitches."}</div>
-      </div>
       <div className="mt-4 grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat title="Revenue" value="$2.6M" change="+4.5%" />
-        <Stat title="COGS" value="$455" change="-0.5%" />
-        <Stat title="Free Cash Flow" value="5,888" change="+4.5%" />
-        <Stat title="EBITDA" value="823,067" change="+21.2%" />
+        <Stat
+          title="Revenue"
+          value={`$${formatNumber(data.kpis[0].value)}`}
+          change="+4.5%"
+        />
+        <Stat
+          title="COGS"
+          value={`$${formatNumber(data.kpis[2].value)}`}
+          change="-0.5%"
+        />
+        <Stat
+          title="Free Cash Flow"
+          value={`$${formatNumber(data.kpis[1].value)}`}
+          change="+4.5%"
+        />
+        <Stat title="EBITDA" value="$823,067" change="+21.2%" />
       </div>
       <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
@@ -134,7 +181,12 @@ export default function Home() {
             <CardTitle>Revenue</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
-            <Overview />
+            <Overview
+              data={[
+                { name: "2019", total: 3000000 },
+                { name: "2020", total: 4433200 },
+              ]}
+            />
           </CardContent>
         </Card>
         <Card className="col-span-4 md:col-span-3">
@@ -156,7 +208,7 @@ export default function Home() {
           </CardContent>
         </Card>
       </div>
-      <div className="container mx-auto py-10">
+      <div className='container mx-auto py-10'>
         <DataTable columns={columns} data={data.kpis} />
       </div>
 
@@ -167,5 +219,5 @@ export default function Home() {
         content={drawerContent}
       />
     </>
-  )
+  );
 }
