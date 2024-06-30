@@ -55,12 +55,19 @@ export default function Home() {
 
   async function handleSearch(event: React.FormEvent) {
     event.preventDefault();
-    const response = await fetch(`http://localhost:8000/api/${search}/${year}`);
-    const result = await response.json();
-    // Handle the result, setting state with the new data
-    setData(result);
-    console.log(result)
+    try {
+      const response = await fetch(`http://localhost:8000/api/${search}/${year}`);
+      if (!response.ok) throw new Error('Failed to fetch');
+      const result = await response.json();
+      // Handle the result, setting state with the new data
+      setData(result);
+      console.log(result);
+    } catch (error) {
+      console.error("Fetch error:", error);
+      setData(null); // Optionally reset data on error
+    }
   }
+
 
   function handleSourceClick(index: number) {
     if (data && data.kpis && data.kpis[index]) {
